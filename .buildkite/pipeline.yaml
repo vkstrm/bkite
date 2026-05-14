@@ -12,6 +12,6 @@ steps:
   # 
   - label: Test
     plugins:
-      - ../gotest-buildkite-plugin:
+      - ./gotestplugin:
         dir: "./..."
 
