@@ -6,12 +6,16 @@ steps:
     command: go build main.go
     key: build
 
+  - label: ":golang: Lint"
+    plugins:
+      - golangci-lint#v1.0.0: ~
+
   # - label: Test
   #   command: go test ./...
   #   key: test
   # 
-  - label: Test
-    plugins:
-      - ./gotestplugin:
-        dir: "./..."
+  # - label: Test
+  #   plugins:
+  #     - ./gotestplugin:
+  #       dir: "./..."
 
