@@ -1,0 +1,8 @@
+steps:
+  - label: Build
+    command: go build main.go
+    key: build
+
+  - label: Test
+    command: go test ./...
+    key: test
