@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
-gotestsum --junitfile junit.xml "$BUILDKITE_PLUGIN_GOTEST_DIR"
+# gotestsum --junitfile junit.xml "$BUILDKITE_PLUGIN_GOTESTPLUGIN_DIR"
+gotestsum --junitfile junit.xml ./...
+
 curl \
   -X POST \
   --fail-with-body \
