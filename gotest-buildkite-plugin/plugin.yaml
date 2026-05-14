@@ -1,0 +1,11 @@
+name: Go Test
+description: Run and upload tests
+author: me
+requirements:
+  - go
+configuration:
+  properties:
+    dir:
+      type: string
+  additionalProperties: false
+

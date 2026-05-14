@@ -1,8 +1,17 @@
 steps:
+  - label: ":pipeline: Pipeline upload"
+    command: buildkite-agent pipeline upload
+
   - label: Build
     command: go build main.go
     key: build
 
+  # - label: Test
+  #   command: go test ./...
+  #   key: test
+  # 
   - label: Test
-    command: go test ./...
-    key: test
+    plugins:
+      - ../gotest-buildkite-plugin:
+        dir: "./..."
+
