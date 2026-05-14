@@ -4,8 +4,11 @@ author: me
 requirements:
   - go
 configuration:
-  properties:
-    dir:
-      type: string
+  properties: {}
   additionalProperties: false
+# configuration:
+#   properties: {}
+  #   dir:
+  #     type: string
+  # additionalProperties: false
 

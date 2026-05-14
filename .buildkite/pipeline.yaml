@@ -14,8 +14,8 @@ steps:
   #   command: go test ./...
   #   key: test
   # 
-  # - label: Test
-  #   plugins:
-  #     - ./gotestplugin:
-  #       dir: "./..."
+  - label: Test
+    plugins:
+      - ./gotestplugin: ~
+        # dir: "./..."
 
