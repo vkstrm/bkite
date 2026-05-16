@@ -5,7 +5,7 @@ steps:
 
   - label: Authenticate
     key: auth
-    command: buildkite-agent oidc request-token --audience "https://packages.buildkite.com/vkstrm-co/stuff" --lifetime 300) # | docker login packages.buildkite.com/vkstrm-co/stuff --username buildkite --password-stdin
+    command: buildkite-agent oidc request-token --audience "https://packages.buildkite.com/vkstrm-co/stuff" --lifetime 300 # | docker login packages.buildkite.com/vkstrm-co/stuff --username buildkite --password-stdin
     # plugins:
     #   - docker-login#v3.0.0:
     #       username: buildkite
