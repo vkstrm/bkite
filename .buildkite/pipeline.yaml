@@ -1,4 +1,4 @@
-image: packages.buildkite.com/vkstrm-co/stuff/gotest:latest
+# image: packages.buildkite.com/vkstrm-co/stuff/gotest:latest
 steps:
   # - label: ":pipeline: Pipeline upload"
   #   command: buildkite-agent pipeline upload
@@ -6,6 +6,9 @@ steps:
   - label: Build
     command: go build main.go
     key: build
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:1.26-alpine"
 
   - label: ":golang: Lint"
     plugins:
@@ -17,6 +20,8 @@ steps:
   # 
   - label: Test
     plugins:
+      - docker#v5.13.0:
+          image: "packages.buildkite.com/vkstrm-co/stuff/gotest:latest"
       - ./gotestplugin: ~
         # dir: "./..."
 
