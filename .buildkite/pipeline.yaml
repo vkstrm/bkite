@@ -1,4 +1,4 @@
-image: packages.buildkite.com/vkstrm-co/stuff/bkite2
+image: packages.buildkite.com/vkstrm-co/stuff/bkite2:latest
 steps:
   # - label: ":pipeline: Pipeline upload"
   #   command: buildkite-agent pipeline upload
