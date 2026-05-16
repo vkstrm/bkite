@@ -3,6 +3,10 @@ steps:
   # - label: ":pipeline: Pipeline upload"
   #   command: buildkite-agent pipeline upload
 
+  - label: Authenticate
+    key: auth
+    command: buildkite-agent oidc request-token --audience "https://packages.buildkite.com/vkstrm-co/stuff" --lifetime 300 | docker login packages.buildkite.com/vkstrm-co/stuff --username buildkite --password-stdin  
+
   - label: Build
     command: go build main.go
     key: build
@@ -19,9 +23,11 @@ steps:
   #   key: test
   # 
   - label: Test
+    depends_on: auth
+    command: go test ./...
     plugins:
       - docker#v5.13.0:
           image: "packages.buildkite.com/vkstrm-co/stuff/gotest:latest"
-      - ./gotestplugin: ~
+      # - ./gotestplugin: ~
         # dir: "./..."
 
