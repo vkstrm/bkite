@@ -9,3 +9,7 @@ func TestAdd(t *testing.T) {
 		t.Fatalf("Expected %d, got %d", expected, actual)
 	}
 }
+
+func TestFail(t *testing.T) {
+	t.Fatalf("Test failed because of this reason")
+}
