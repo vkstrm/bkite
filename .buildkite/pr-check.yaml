@@ -1,0 +1,11 @@
+steps:
+  - label: Build
+    command: go build main.go
+    key: build
+    plugins:
+      - docker#v5.13.0:
+          image: "golang:1.26-alpine"
+
+  - label: ":golang: Lint"
+    plugins:
+      - golangci-lint#v1.0.0: ~
