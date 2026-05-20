@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO="vkstrm-co/stuff"
-IMAGE="packages.buildkite.com/vkstrm-co/stuff/gotest:latest"
+IMAGE="packages.buildkite.com/${REPO}/bkite:latest"
 
 if [[ $# == 0 ]]; then
   echo "Requires arguments"
