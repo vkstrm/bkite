@@ -32,6 +32,8 @@ steps:
   - label: Test
     # depends_on: auth
     command: ./test.sh gotestsum --junitfile junit.xml ./...
+    secrets:
+      BUILDKITE_ANALYTICS_TOKEN: TEST_SUITE_KEY
     plugins:
         - test-collector#v1.11.0:
             format: junit
