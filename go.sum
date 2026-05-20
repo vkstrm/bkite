@@ -1,0 +1,4 @@
+github.com/buildkite/buildkite-sdk/sdk/go v0.10.0 h1:LtbSSH3HYaKISXZGgTXzFB5RZcYhRr13L2+E3p2U4Q8=
+github.com/buildkite/buildkite-sdk/sdk/go v0.10.0/go.mod h1:0lJfbclWR/AjfdcVN3oz2lVjeFZZzsvF8PACsgAi9os=
+github.com/itchyny/json2yaml v0.1.5 h1:wKaepxwivjcn2ssiLu7v4KrLKSIILWtwD/8L054tTdI=
+github.com/itchyny/json2yaml v0.1.5/go.mod h1:lBQ0JI7HugKRQy/c5/U3KRymvBNub/HTbSXHS9/4018=
