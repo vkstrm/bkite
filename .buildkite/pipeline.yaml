@@ -3,9 +3,12 @@ steps:
   # - label: ":pipeline: Pipeline upload"
   #   command: buildkite-agent pipeline upload
 
-  - label: Authenticate
-    key: auth
-    command: buildkite-agent oidc request-token --audience "https://packages.buildkite.com/vkstrm-co/stuff" --lifetime 300 | docker login packages.buildkite.com/vkstrm-co/stuff --username buildkite --password-stdin
+  # - label: Authenticate
+  #   key: auth
+  #   command: |
+  #     buildkite-agent oidc request-token --audience "https://packages.buildkite.com/vkstrm-co/stuff" --lifetime 300 | docker login packages.buildkite.com/vkstrm-co/stuff --username buildkite --password-stdin
+  #     docker pull "packages.buildkite.com/vkstrm-co/stuff/gotest:latest"
+  #     docker run --rm "packages.buildkite.com/vkstrm-co/stuff/gotest:latest" your-command
     # plugins:
     #   - docker-login#v3.0.0:
     #       username: buildkite
@@ -27,11 +30,10 @@ steps:
   #   key: test
   # 
   - label: Test
-    depends_on: auth
-    command: go test ./...
+    # depends_on: auth
+    command: ./test.sh gotestsum --junitfile junit.xml ./...
     plugins:
-      - docker#v5.13.0:
-          image: "packages.buildkite.com/vkstrm-co/stuff/gotest:latest"
-      # - ./gotestplugin: ~
-        # dir: "./..."
+        - test-collector#v1.11.0:
+            format: junit
+            files: junit.xml
 
