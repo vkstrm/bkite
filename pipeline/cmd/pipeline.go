@@ -39,7 +39,7 @@ func main() {
 func handlePush(pipe buildkite.Pipeline) buildkite.Pipeline {
 	pipe.AddStep(buildkite.CommandStep{
 		Command: &buildkite.CommandStepCommand{
-			String: buildkite.Value("echo 'Hello, main!"),
+			String: buildkite.Value("echo 'Hello, main!'"),
 		},
 	})
 
