@@ -14,15 +14,17 @@ type BuildContext struct {
 }
 
 func main() {
-	buildContext := BuildContext{
-		branch: os.Getenv("BUILDKITE_BRANCH"),
-		commit: os.Getenv("BUILDKITE_COMMIT"),
-	}
+	// buildContext := BuildContext{
+	// 	branch: os.Getenv("BUILDKITE_BRANCH"),
+	// 	commit: os.Getenv("BUILDKITE_COMMIT"),
+	// }
 	pipeline := buildkite.Pipeline{}
 
 	githubEvent := os.Getenv("BUILDKITE_GITHUB_EVENT")
 	if githubEvent == "pull_request" {
-		pipeline = handlePullRequest(buildContext, pipeline)
+		pipeline = handlePullRequest(pipeline)
+	} else {
+		pipeline = handlePush(pipeline)
 	}
 
 	// YAML output
@@ -44,7 +46,7 @@ func handlePush(pipe buildkite.Pipeline) buildkite.Pipeline {
 	return pipe
 }
 
-func handlePullRequest(ctx BuildContext, pipe buildkite.Pipeline) buildkite.Pipeline {
+func handlePullRequest(pipe buildkite.Pipeline) buildkite.Pipeline {
 	pipe.AddStep(buildkite.CommandStep{
 		Label: buildkite.Value("Build"),
 		Key:   buildkite.Value("build"),
