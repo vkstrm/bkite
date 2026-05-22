@@ -3,18 +3,27 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/buildkite/buildkite-sdk/sdk/go/sdk/buildkite"
 )
 
+type BuildContext struct {
+	branch string
+	commit string
+}
+
 func main() {
+	buildContext := BuildContext{
+		branch: os.Getenv("BUILDKITE_BRANCH"),
+		commit: os.Getenv("BUILDKITE_COMMIT"),
+	}
 	pipeline := buildkite.Pipeline{}
 
-	pipeline.AddStep(buildkite.CommandStep{
-		Command: &buildkite.CommandStepCommand{
-			String: buildkite.Value("echo 'Hello, world!"),
-		},
-	})
+	githubEvent := os.Getenv("BUILDKITE_GITHUB_EVENT")
+	if githubEvent == "pull_request" {
+		pipeline = handlePullRequest(buildContext, pipeline)
+	}
 
 	// YAML output
 	yaml, err := pipeline.ToYAML()
@@ -23,4 +32,47 @@ func main() {
 	}
 
 	fmt.Println(yaml)
+}
+
+func handlePush(pipe buildkite.Pipeline) buildkite.Pipeline {
+	pipe.AddStep(buildkite.CommandStep{
+		Command: &buildkite.CommandStepCommand{
+			String: buildkite.Value("echo 'Hello, main!"),
+		},
+	})
+
+	return pipe
+}
+
+func handlePullRequest(ctx BuildContext, pipe buildkite.Pipeline) buildkite.Pipeline {
+	pipe.AddStep(buildkite.CommandStep{
+		Label: buildkite.Value("Build"),
+		Key:   buildkite.Value("build"),
+		Command: &buildkite.CommandStepCommand{
+			String: buildkite.Value("go build main.go"),
+		},
+		Plugins: &buildkite.Plugins{
+			PluginsList: &buildkite.PluginsList{
+				buildkite.PluginsListItem{
+					String: buildkite.Value("docker#v5.13.0"),
+					PluginsList: &buildkite.PluginsListObject{
+						"image": "golang:1.26-alpine",
+					},
+				},
+			},
+		},
+	})
+
+	pipe.AddStep(buildkite.CommandStep{
+		Label: buildkite.Value(":golang: Lint"),
+		Key:   buildkite.Value("Lint"),
+		Plugins: &buildkite.Plugins{
+			PluginsList: &buildkite.PluginsList{
+				buildkite.PluginsListItem{
+					String: buildkite.Value("golangci-lint#v1.0.0"),
+				},
+			},
+		},
+	})
+	return pipe
 }

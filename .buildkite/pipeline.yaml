@@ -1,3 +1,4 @@
 steps:
   - label: ':pipeline:'
-    command: buildkite-agent pipeline upload .buildkite/pr-check.yaml
+    command: pipeline.sh
+
