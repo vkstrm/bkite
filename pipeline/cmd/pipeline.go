@@ -16,6 +16,7 @@ type BuildContext struct {
 
 func main() {
 	changedPaths := strings.Split(os.Getenv("CHANGED_PATHS"), ",")
+	log.Printf("changedPaths: %v", changedPaths)
 	buildContext := BuildContext{
 		branch: os.Getenv("BUILDKITE_BRANCH"),
 		commit: os.Getenv("BUILDKITE_COMMIT"),
