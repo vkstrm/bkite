@@ -25,6 +25,8 @@ func main() {
 		pipeline = handlePullRequest(pipeline)
 	} else if buildContext.branch == "main" {
 		pipeline = handlePush(buildContext, pipeline)
+	} else {
+		log.Fatal("Unknown event")
 	}
 
 	yaml, err := pipeline.ToYAML()
