@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/buildkite/buildkite-sdk/sdk/go/sdk/buildkite"
 )
@@ -14,6 +15,7 @@ type BuildContext struct {
 }
 
 func main() {
+	changedPaths := strings.Split(os.Getenv("CHANGED_PATHS"), ",")
 	buildContext := BuildContext{
 		branch: os.Getenv("BUILDKITE_BRANCH"),
 		commit: os.Getenv("BUILDKITE_COMMIT"),
@@ -24,11 +26,28 @@ func main() {
 	log.Printf("BUILDKITE_PULL_REQUEST: %s", os.Getenv("BUILDKITE_PULL_REQUEST"))
 	pipeline := buildkite.Pipeline{}
 
+	adder := false
+	subber := false
+	for _, v := range changedPaths {
+		if strings.HasPrefix(v, "services/adder") {
+			adder = true
+		}
+
+		if strings.HasPrefix(v, "services/subber") {
+			subber = true
+		}
+	}
+
 	githubEvent := os.Getenv("BUILDKITE_GITHUB_EVENT")
 	if githubEvent == "pull_request" {
 		pipeline = handlePullRequest(pipeline)
 	} else if buildContext.branch == "main" {
-		pipeline = handlePush(buildContext, pipeline)
+		if adder {
+			pipeline = deployAdder(buildContext, pipeline)
+		}
+		if subber {
+			pipeline = deploySubber(buildContext, pipeline)
+		}
 	} else {
 		log.Fatal("Unknown event")
 	}
@@ -41,8 +60,20 @@ func main() {
 	fmt.Println(yaml)
 }
 
-func handlePush(bctx BuildContext, pipe buildkite.Pipeline) buildkite.Pipeline {
+func deployAdder(bctx BuildContext, pipe buildkite.Pipeline) buildkite.Pipeline {
 	pipe.AddStep(buildkite.CommandStep{
+		Label: buildkite.Value("Deploying Adder"),
+		Command: &buildkite.CommandStepCommand{
+			String: buildkite.Value(fmt.Sprintf("echo 'Deploying commit %s'", bctx.commit)),
+		},
+	})
+
+	return pipe
+}
+
+func deploySubber(bctx BuildContext, pipe buildkite.Pipeline) buildkite.Pipeline {
+	pipe.AddStep(buildkite.CommandStep{
+		Label: buildkite.Value("Deploying Subber"),
 		Command: &buildkite.CommandStepCommand{
 			String: buildkite.Value(fmt.Sprintf("echo 'Deploying commit %s'", bctx.commit)),
 		},
