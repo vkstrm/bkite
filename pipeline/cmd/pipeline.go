@@ -14,20 +14,19 @@ type BuildContext struct {
 }
 
 func main() {
-	// buildContext := BuildContext{
-	// 	branch: os.Getenv("BUILDKITE_BRANCH"),
-	// 	commit: os.Getenv("BUILDKITE_COMMIT"),
-	// }
+	buildContext := BuildContext{
+		branch: os.Getenv("BUILDKITE_BRANCH"),
+		commit: os.Getenv("BUILDKITE_COMMIT"),
+	}
 	pipeline := buildkite.Pipeline{}
 
 	githubEvent := os.Getenv("BUILDKITE_GITHUB_EVENT")
-	if githubEvent == "pull_request" {
+	if githubEvent == "pull_request" && buildContext.branch != "main" {
 		pipeline = handlePullRequest(pipeline)
-	} else {
-		pipeline = handlePush(pipeline)
+	} else if buildContext.branch == "main" {
+		pipeline = handlePush(buildContext, pipeline)
 	}
 
-	// YAML output
 	yaml, err := pipeline.ToYAML()
 	if err != nil {
 		log.Fatalf("Failed to serialize YAML: %v", err)
@@ -36,10 +35,10 @@ func main() {
 	fmt.Println(yaml)
 }
 
-func handlePush(pipe buildkite.Pipeline) buildkite.Pipeline {
+func handlePush(bctx BuildContext, pipe buildkite.Pipeline) buildkite.Pipeline {
 	pipe.AddStep(buildkite.CommandStep{
 		Command: &buildkite.CommandStepCommand{
-			String: buildkite.Value("echo 'Hello, main!'"),
+			String: buildkite.Value(fmt.Sprintf("echo 'Deploying commit %s'", bctx.commit)),
 		},
 	})
 
