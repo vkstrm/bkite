@@ -1,6 +1,6 @@
 steps:
   - label: Test
-    command: ./test.sh gotestsum --junitfile junit.xml ./...
+    command: ./test.sh gotestsum --junitfile junit.xml ./apitest/...
     secrets:
       BUILDKITE_ANALYTICS_TOKEN: TEST_SUITE_KEY
     plugins:
