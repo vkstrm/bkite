@@ -7,7 +7,7 @@ IMAGE="packages.buildkite.com/${REPO}/bkite:latest"
 
 # Propagate env variables
 env | grep BUILDKITE > env.list
-CHANGED_PATHS=$(git --no-pager diff --name-only main | tr '\n' ',')
+CHANGED_PATHS=$(git --no-pager diff --name-only HEAD~1 | tr '\n' ',')
 
 buildkite-agent oidc request-token --audience "https://packages.buildkite.com/${REPO}" --lifetime 300 | docker login packages.buildkite.com/${REPO} --username buildkite --password-stdin
 docker pull $IMAGE
