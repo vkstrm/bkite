@@ -1,4 +1,4 @@
 steps:
   - label: ':pipeline:'
-    command: pipeline.sh
+    command: ./ci/pipeline.sh
 

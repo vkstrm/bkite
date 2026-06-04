@@ -15,75 +15,91 @@ type BuildContext struct {
 }
 
 func main() {
-	changedPaths := strings.Split(os.Getenv("CHANGED_PATHS"), ",")
-	log.Printf("changedPaths: %v", changedPaths)
-	buildContext := BuildContext{
+	pipeline, err := parse_event()
+	if err != nil {
+		panic(err)
+	}
+	finished(pipeline)
+}
+
+func parse_event() (*buildkite.Pipeline, error) {
+	bctx := BuildContext{
 		branch: os.Getenv("BUILDKITE_BRANCH"),
 		commit: os.Getenv("BUILDKITE_COMMIT"),
 	}
-	log.Printf("BUILDKITE_GITHUB_ACTION: %s", os.Getenv("BUILDKITE_GITHUB_ACTION"))
-	log.Printf("BUILDKITE_GITHUB_EVENT: %s", os.Getenv("BUILDKITE_GITHUB_EVENT"))
-	log.Printf("BUILDKITE_MESSAGE: %s", os.Getenv("BUILDKITE_MESSAGE"))
-	log.Printf("BUILDKITE_PULL_REQUEST: %s", os.Getenv("BUILDKITE_PULL_REQUEST"))
-	pipeline := buildkite.Pipeline{}
+	pull_request := os.Getenv("BUILDKITE_PULL_REQUEST")
+	pipeline := buildkite.NewPipeline()
+	changeMap := getChangedPaths()
 
-	adder := false
-	subber := false
-	for _, v := range changedPaths {
-		if strings.HasPrefix(v, "services/adder") {
-			adder = true
-		}
-
-		if strings.HasPrefix(v, "services/subber") {
-			subber = true
-		}
+	if pull_request != "false" {
+		handlePullRequest(pipeline)
+		return pipeline, nil
 	}
 
-	githubEvent := os.Getenv("BUILDKITE_GITHUB_EVENT")
-	if githubEvent == "pull_request" {
-		pipeline = handlePullRequest(pipeline)
-	} else if buildContext.branch == "main" {
-		if adder {
-			pipeline = deployAdder(buildContext, pipeline)
+	if bctx.branch == "main" {
+		if changeMap[adderPath] {
+			deployAdder(bctx, pipeline)
 		}
-		if subber {
-			pipeline = deploySubber(buildContext, pipeline)
+		if changeMap[subberPath] {
+			deploySubber(bctx, pipeline)
 		}
-	} else {
-		log.Fatal("Unknown event")
+		return pipeline, nil
 	}
 
-	yaml, err := pipeline.ToYAML()
-	if err != nil {
-		log.Fatalf("Failed to serialize YAML: %v", err)
-	}
-
-	fmt.Println(yaml)
+	return nil, fmt.Errorf("Unparsable event")
 }
 
-func deployAdder(bctx BuildContext, pipe buildkite.Pipeline) buildkite.Pipeline {
+const (
+	adderPath  = "services/adder"
+	subberPath = "services/adder"
+)
+
+var definedPaths = []string{adderPath, subberPath}
+
+func getChangedPaths() map[string]bool {
+	changedPaths := strings.Split(os.Getenv("CHANGED_PATHS"), ",")
+	changeMap := map[string]bool{}
+	for _, changedPath := range changedPaths {
+		for _, definedPath := range definedPaths {
+			if strings.HasPrefix(changedPath, definedPath) {
+				changeMap[definedPath] = true
+			}
+		}
+	}
+	return changeMap
+}
+
+func finished(pipe *buildkite.Pipeline) error {
+	yaml, err := pipe.ToYAML()
+	if err != nil {
+		log.Fatalf("Failed to serialize YAML: %v", err)
+		return err
+	}
+
+	// TODO Create file dont print
+	fmt.Println(yaml)
+	return nil
+}
+
+func deployAdder(bctx BuildContext, pipe *buildkite.Pipeline) {
 	pipe.AddStep(buildkite.CommandStep{
 		Label: buildkite.Value("Deploying Adder"),
 		Command: &buildkite.CommandStepCommand{
 			String: buildkite.Value(fmt.Sprintf("echo 'Deploying commit %s'", bctx.commit)),
 		},
 	})
-
-	return pipe
 }
 
-func deploySubber(bctx BuildContext, pipe buildkite.Pipeline) buildkite.Pipeline {
+func deploySubber(bctx BuildContext, pipe *buildkite.Pipeline) {
 	pipe.AddStep(buildkite.CommandStep{
 		Label: buildkite.Value("Deploying Subber"),
 		Command: &buildkite.CommandStepCommand{
 			String: buildkite.Value(fmt.Sprintf("echo 'Deploying commit %s'", bctx.commit)),
 		},
 	})
-
-	return pipe
 }
 
-func handlePullRequest(pipe buildkite.Pipeline) buildkite.Pipeline {
+func handlePullRequest(pipe *buildkite.Pipeline) {
 	pipe.AddStep(buildkite.CommandStep{
 		Label: buildkite.Value("Build"),
 		Key:   buildkite.Value("build"),
@@ -113,5 +129,4 @@ func handlePullRequest(pipe buildkite.Pipeline) buildkite.Pipeline {
 			},
 		},
 	})
-	return pipe
 }
