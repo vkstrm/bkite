@@ -13,6 +13,7 @@ buildkite-agent oidc request-token --audience "https://packages.buildkite.com/${
 docker pull $IMAGE
 docker run --rm -v $(pwd):$(pwd) -w $(pwd) --env CHANGED_PATHS="${CHANGED_PATHS}" --env-file env.list $IMAGE go run ci/pipeline/cmd/pipeline.go > custom-pipe.yaml
 
+cat custom-pipe.yaml
 if [[ "$(cat custom-pipe.yaml)" == "{}" ]]; then
   buildkite-agent stop
 fi
