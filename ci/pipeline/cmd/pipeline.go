@@ -46,7 +46,7 @@ func parse_event() (*buildkite.Pipeline, error) {
 		return pipeline, nil
 	}
 
-	return nil, fmt.Errorf("Unparsable event")
+	return nil, nil
 }
 
 const (
