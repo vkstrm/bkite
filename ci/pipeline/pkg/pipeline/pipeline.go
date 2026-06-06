@@ -1,10 +1,9 @@
-package main
+package pipeline
 
 import (
+	"bkite/ci/pipeline/pkg/parsers"
 	"fmt"
-	"log"
 	"os"
-	"strings"
 
 	"github.com/buildkite/buildkite-sdk/sdk/go/sdk/buildkite"
 )
@@ -14,22 +13,20 @@ type BuildContext struct {
 	commit string
 }
 
-func main() {
-	pipeline := buildkite.NewPipeline()
-	parse_event(pipeline)
-	err := finished(pipeline)
-	if err != nil {
-		panic(err)
-	}
-}
+const (
+	adderPath  = "services/adder"
+	subberPath = "services/adder"
+)
 
-func parse_event(pipeline *buildkite.Pipeline) {
+var definedPaths = []string{adderPath, subberPath}
+
+func ParseEvent(pipeline *buildkite.Pipeline) {
 	bctx := BuildContext{
 		branch: os.Getenv("BUILDKITE_BRANCH"),
 		commit: os.Getenv("BUILDKITE_COMMIT"),
 	}
 	pull_request := os.Getenv("BUILDKITE_PULL_REQUEST")
-	changeMap := getChangedPaths()
+	changeMap := parsers.ChangedPaths(definedPaths)
 
 	if pull_request != "false" {
 		handlePullRequest(pipeline)
@@ -43,43 +40,6 @@ func parse_event(pipeline *buildkite.Pipeline) {
 			deploySubber(bctx, pipeline)
 		}
 	}
-}
-
-const (
-	adderPath  = "services/adder"
-	subberPath = "services/adder"
-)
-
-var definedPaths = []string{adderPath, subberPath}
-
-func getChangedPaths() map[string]bool {
-	changedPaths := strings.Split(os.Getenv("CHANGED_PATHS"), ",")
-	changeMap := map[string]bool{}
-	for _, changedPath := range changedPaths {
-		for _, definedPath := range definedPaths {
-			if strings.HasPrefix(changedPath, definedPath) {
-				changeMap[definedPath] = true
-			}
-		}
-	}
-	return changeMap
-}
-
-func finished(pipe *buildkite.Pipeline) error {
-	yaml, err := pipe.ToYAML()
-	if err != nil {
-		log.Fatalf("Failed to serialize YAML: %v", err)
-		return err
-	}
-
-	file, err := os.Create("cpipeline.yaml")
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.WriteString(yaml)
-	return err
 }
 
 func deployAdder(bctx BuildContext, pipe *buildkite.Pipeline) {
