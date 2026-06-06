@@ -15,25 +15,24 @@ type BuildContext struct {
 }
 
 func main() {
-	pipeline, err := parse_event()
+	pipeline := buildkite.NewPipeline()
+	parse_event(pipeline)
+	err := finished(pipeline)
 	if err != nil {
 		panic(err)
 	}
-	finished(pipeline)
 }
 
-func parse_event() (*buildkite.Pipeline, error) {
+func parse_event(pipeline *buildkite.Pipeline) {
 	bctx := BuildContext{
 		branch: os.Getenv("BUILDKITE_BRANCH"),
 		commit: os.Getenv("BUILDKITE_COMMIT"),
 	}
 	pull_request := os.Getenv("BUILDKITE_PULL_REQUEST")
-	pipeline := buildkite.NewPipeline()
 	changeMap := getChangedPaths()
 
 	if pull_request != "false" {
 		handlePullRequest(pipeline)
-		return pipeline, nil
 	}
 
 	if bctx.branch == "main" {
@@ -43,10 +42,7 @@ func parse_event() (*buildkite.Pipeline, error) {
 		if changeMap[subberPath] {
 			deploySubber(bctx, pipeline)
 		}
-		return pipeline, nil
 	}
-
-	return nil, nil
 }
 
 const (
@@ -76,9 +72,14 @@ func finished(pipe *buildkite.Pipeline) error {
 		return err
 	}
 
-	// TODO Create file dont print
-	fmt.Println(yaml)
-	return nil
+	file, err := os.Create("cpipeline.yaml")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(yaml)
+	return err
 }
 
 func deployAdder(bctx BuildContext, pipe *buildkite.Pipeline) {
