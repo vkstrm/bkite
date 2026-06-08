@@ -90,4 +90,28 @@ func handlePullRequest(pipe *buildkite.Pipeline) {
 			},
 		},
 	})
+
+	pipe.AddStep(buildkite.CommandStep{
+		Label: buildkite.Value("Test"),
+		Key:   buildkite.Value("Test"),
+		Command: &buildkite.CommandStepCommand{
+			String: buildkite.Value("./test.sh gotestsum --junitfile junit.xml ./apitest/..."),
+		},
+		Secrets: &buildkite.Secrets{
+			Secrets: &buildkite.SecretsObject{
+				"BUILDKITE_ANALYTICS_TOKEN": "TEST_SUITE_KEY",
+			},
+		},
+		Plugins: &buildkite.Plugins{
+			PluginsList: &buildkite.PluginsList{
+				buildkite.PluginsListItem{
+					String: buildkite.Value("test-collector#v1.11.0"),
+					PluginsList: &buildkite.PluginsListObject{
+						"format": "junit",
+						"files":  "junit.xml",
+					},
+				},
+			},
+		},
+	})
 }
