@@ -63,24 +63,9 @@ func deploySubber(bctx BuildContext, pipe *buildkite.Pipeline) {
 }
 
 func handlePullRequest(pipe *buildkite.Pipeline) {
-	pipe.AddStep(buildkite.CommandStep{
-		Label: buildkite.Value("Build"),
-		Key:   buildkite.Value("build"),
-		Command: &buildkite.CommandStepCommand{
-			String: buildkite.Value("go build main.go"),
-		},
-		Plugins: &buildkite.Plugins{
-			PluginsList: &buildkite.PluginsList{
-				{
-					PluginsList: &buildkite.PluginsListObject{
-						"docker#v5.13.0": map[string]string{
-							"image": "golang:1.26-alpine",
-						},
-					},
-				},
-			},
-		},
-	})
+	for _, v := range []string{"services/adder/cmd/main.go", "services/subber/cmd/main.go"} {
+		buildService(pipe, v)
+	}
 
 	pipe.AddStep(buildkite.CommandStep{
 		Label: buildkite.Value(":golang: Lint"),
@@ -112,6 +97,27 @@ func handlePullRequest(pipe *buildkite.Pipeline) {
 						"test-collector#v1.11.0": map[string]string{
 							"format": "junit",
 							"files":  "junit.xml",
+						},
+					},
+				},
+			},
+		},
+	})
+}
+
+func buildService(pipe *buildkite.Pipeline, service string) {
+	pipe.AddStep(buildkite.CommandStep{
+		Label: buildkite.Value("Build"),
+		Key:   buildkite.Value("build"),
+		Command: &buildkite.CommandStepCommand{
+			String: buildkite.Value(fmt.Sprintf("go build %s", service)),
+		},
+		Plugins: &buildkite.Plugins{
+			PluginsList: &buildkite.PluginsList{
+				{
+					PluginsList: &buildkite.PluginsListObject{
+						"docker#v5.13.0": map[string]string{
+							"image": "golang:1.26-alpine",
 						},
 					},
 				},
