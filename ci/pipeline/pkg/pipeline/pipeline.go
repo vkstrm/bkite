@@ -108,7 +108,6 @@ func handlePullRequest(pipe *buildkite.Pipeline) {
 func buildService(pipe *buildkite.Pipeline, service string) {
 	pipe.AddStep(buildkite.CommandStep{
 		Label: buildkite.Value("Build"),
-		Key:   buildkite.Value(fmt.Sprintf("build %s", service)),
 		Command: &buildkite.CommandStepCommand{
 			String: buildkite.Value(fmt.Sprintf("go build %s", service)),
 		},
