@@ -70,10 +70,11 @@ func handlePullRequest(pipe *buildkite.Pipeline) {
 		},
 		Plugins: &buildkite.Plugins{
 			PluginsList: &buildkite.PluginsList{
-				buildkite.PluginsListItem{
-					String: buildkite.Value("docker#v5.13.0"),
+				{
 					PluginsList: &buildkite.PluginsListObject{
-						"image": "golang:1.26-alpine",
+						"docker#v5.13.0": map[string]string{
+							"image": "golang:1.26-alpine",
+						},
 					},
 				},
 			},
@@ -106,10 +107,11 @@ func handlePullRequest(pipe *buildkite.Pipeline) {
 		Plugins: &buildkite.Plugins{
 			PluginsList: &buildkite.PluginsList{
 				buildkite.PluginsListItem{
-					String: buildkite.Value("test-collector#v1.11.0"),
 					PluginsList: &buildkite.PluginsListObject{
-						"format": "junit",
-						"files":  "junit.xml",
+						"test-collector#v1.11.0": map[string]string{
+							"format": "junit",
+							"files":  "junit.xml",
+						},
 					},
 				},
 			},
