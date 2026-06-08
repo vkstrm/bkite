@@ -28,6 +28,7 @@ func ParseEvent(pipeline *buildkite.Pipeline) {
 	pull_request := os.Getenv("BUILDKITE_PULL_REQUEST")
 	changeMap := parsers.ChangedPaths(definedPaths)
 
+	fmt.Println(pull_request)
 	if pull_request != "false" {
 		handlePullRequest(pipeline)
 	}
