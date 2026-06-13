@@ -2,7 +2,6 @@ package main
 
 import "fmt"
 
-// Ny kommentar
 func sub(a, b int) int {
 	return a - b
 }

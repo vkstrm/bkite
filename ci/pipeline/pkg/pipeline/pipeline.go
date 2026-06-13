@@ -44,6 +44,7 @@ func ParseEvent(pipeline *buildkite.Pipeline) {
 
 func handleRelease(bctx buildContext, pipe *buildkite.Pipeline, changeMap map[string]bool) {
 	if len(changeMap) == 0 {
+		log.Print("No changed paths")
 		return
 	}
 
