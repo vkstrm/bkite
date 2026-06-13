@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/buildkite/buildkite-sdk/sdk/go/sdk/buildkite"
 )
@@ -31,7 +32,8 @@ func ParseEvent(pipeline *buildkite.Pipeline) {
 	changeMap := parsers.ChangedPaths(changes, definedPaths)
 
 	log.Printf("BUILDKITE_PULL_REQUEST: %s", pull_request)
-	if pull_request != "" {
+	_, err := strconv.Atoi(pull_request)
+	if err == nil {
 		handlePullRequest(pipeline)
 		return
 	}
@@ -41,6 +43,10 @@ func ParseEvent(pipeline *buildkite.Pipeline) {
 }
 
 func handleRelease(bctx buildContext, pipe *buildkite.Pipeline, changeMap map[string]bool) {
+	if len(changeMap) == 0 {
+		return
+	}
+
 	if changeMap[adderPath] {
 		deployAdder(bctx, pipe, "stage")
 	}
