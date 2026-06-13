@@ -48,35 +48,35 @@ func handleRelease(bctx buildContext, pipe *buildkite.Pipeline, changeMap map[st
 		return
 	}
 
+	testStageDepends := []buildkite.DependsOnListItem{}
 	if changeMap[adderPath] {
 		deployAdder(bctx, pipe, "stage")
+		testStageDepends = append(testStageDepends, buildkite.DependsOnListItem{
+			String: buildkite.Value("adder-stage"),
+		})
 	}
 	if changeMap[subberPath] {
 		deploySubber(bctx, pipe, "stage")
-	}
-	testStep(pipe, "stage", &buildkite.DependsOnList{
-		buildkite.DependsOnListItem{
-			String: buildkite.Value("adder-stage"),
-		},
-		buildkite.DependsOnListItem{
+		testStageDepends = append(testStageDepends, buildkite.DependsOnListItem{
 			String: buildkite.Value("subber-stage"),
-		},
-	})
+		})
+	}
+	testStep(pipe, "stage", &testStageDepends)
 	prodButton(pipe)
+	testProdDepends := []buildkite.DependsOnListItem{}
 	if changeMap[adderPath] {
 		deployAdder(bctx, pipe, "prod")
+		testProdDepends = append(testProdDepends, buildkite.DependsOnListItem{
+			String: buildkite.Value("adder-prod"),
+		})
 	}
 	if changeMap[subberPath] {
 		deploySubber(bctx, pipe, "prod")
+		testProdDepends = append(testProdDepends, buildkite.DependsOnListItem{
+			String: buildkite.Value("subber-stage"),
+		})
 	}
-	testStep(pipe, "prod", &buildkite.DependsOnList{
-		buildkite.DependsOnListItem{
-			String: buildkite.Value("adder-prod"),
-		},
-		buildkite.DependsOnListItem{
-			String: buildkite.Value("subber-prod"),
-		},
-	})
+	testStep(pipe, "prod", &testProdDepends)
 
 }
 
