@@ -24,7 +24,7 @@ func finished(pipe *buildkite.Pipeline) error {
 		return err
 	}
 
-	file, err := os.Create("cpipeline.yaml")
+	file, err := os.Create("pipe.yaml")
 	if err != nil {
 		return err
 	}
