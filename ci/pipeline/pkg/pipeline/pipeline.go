@@ -49,10 +49,10 @@ func handleRelease(bctx buildContext, pipe *buildkite.Pipeline, changeMap map[st
 	}
 
 	if changeMap[adderPath] {
-		deployAdder(bctx, pipe, "stage", "")
+		deployAdder(bctx, pipe, "stage")
 	}
 	if changeMap[subberPath] {
-		deploySubber(bctx, pipe, "stage", "")
+		deploySubber(bctx, pipe, "stage")
 	}
 	testStep(pipe, &buildkite.DependsOnList{
 		buildkite.DependsOnListItem{
@@ -64,65 +64,45 @@ func handleRelease(bctx buildContext, pipe *buildkite.Pipeline, changeMap map[st
 	})
 	prodButton(pipe)
 	if changeMap[adderPath] {
-		deployAdder(bctx, pipe, "prod", "prod-gate")
+		deployAdder(bctx, pipe, "prod")
 	}
 	if changeMap[subberPath] {
-		deploySubber(bctx, pipe, "prod", "prod-gate")
+		deploySubber(bctx, pipe, "prod")
 	}
+	testStep(pipe, &buildkite.DependsOnList{
+		buildkite.DependsOnListItem{
+			String: buildkite.Value("adder-prod"),
+		},
+		buildkite.DependsOnListItem{
+			String: buildkite.Value("subber-prod"),
+		},
+	})
 
 }
 
 func prodButton(pipe *buildkite.Pipeline) {
-	pipe.AddStep(buildkite.InputStep{
-		Input: buildkite.Value("Prod gate"),
-		Label: buildkite.Value("Prod gate"),
-		Key:   buildkite.Value("prod-gate"),
-		DependsOn: &buildkite.DependsOn{
-			String: buildkite.Value("test"),
-		},
-		Fields: &buildkite.Fields{
-			buildkite.FieldsItem{
-				SelectField: &buildkite.SelectField{
-					Key:    buildkite.Value("prod-decision"),
-					Select: buildkite.Value("Deploy to production?"),
-					Options: []buildkite.SelectFieldOption{
-						{
-							Label: buildkite.Value("Yes"),
-							Value: buildkite.Value("yes"),
-						},
-						{
-							Label: buildkite.Value("No"),
-							Value: buildkite.Value("no"),
-						},
-					},
-				},
-			},
-		},
+	pipe.AddStep(buildkite.BlockStep{
+		Block:  buildkite.Value("Ship it?"),
+		Prompt: buildkite.Value("Ship it?"),
 	})
 }
 
-func deployAdder(bctx buildContext, pipe *buildkite.Pipeline, environment string, dependsOn string) {
+func deployAdder(bctx buildContext, pipe *buildkite.Pipeline, environment string) {
 	pipe.AddStep(buildkite.CommandStep{
 		Label: buildkite.Value("Deploying Adder"),
 		Key:   buildkite.Value(fmt.Sprintf("adder-%s", environment)),
 		Command: &buildkite.CommandStepCommand{
 			String: buildkite.Value(fmt.Sprintf("echo 'Deploying commit %s to %s'", bctx.commit, environment)),
 		},
-		DependsOn: &buildkite.DependsOn{
-			String: &dependsOn,
-		},
 	})
 }
 
-func deploySubber(bctx buildContext, pipe *buildkite.Pipeline, environment, dependsOn string) {
+func deploySubber(bctx buildContext, pipe *buildkite.Pipeline, environment string) {
 	pipe.AddStep(buildkite.CommandStep{
 		Label: buildkite.Value("Deploying Subber"),
 		Key:   buildkite.Value(fmt.Sprintf("subber-%s", environment)),
 		Command: &buildkite.CommandStepCommand{
 			String: buildkite.Value(fmt.Sprintf("echo 'Deploying commit %s to %s'", bctx.commit, environment)),
-		},
-		DependsOn: &buildkite.DependsOn{
-			String: &dependsOn,
 		},
 	})
 }
