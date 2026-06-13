@@ -54,7 +54,7 @@ func handleRelease(bctx buildContext, pipe *buildkite.Pipeline, changeMap map[st
 	if changeMap[subberPath] {
 		deploySubber(bctx, pipe, "stage")
 	}
-	testStep(pipe, &buildkite.DependsOnList{
+	testStep(pipe, "stage", &buildkite.DependsOnList{
 		buildkite.DependsOnListItem{
 			String: buildkite.Value("adder-stage"),
 		},
@@ -69,7 +69,7 @@ func handleRelease(bctx buildContext, pipe *buildkite.Pipeline, changeMap map[st
 	if changeMap[subberPath] {
 		deploySubber(bctx, pipe, "prod")
 	}
-	testStep(pipe, &buildkite.DependsOnList{
+	testStep(pipe, "prod", &buildkite.DependsOnList{
 		buildkite.DependsOnListItem{
 			String: buildkite.Value("adder-prod"),
 		},
@@ -124,13 +124,13 @@ func handlePullRequest(pipe *buildkite.Pipeline) {
 		},
 	})
 
-	testStep(pipe, nil)
+	testStep(pipe, "pull-request", nil)
 }
 
-func testStep(pipe *buildkite.Pipeline, dependsOn *buildkite.DependsOnList) {
+func testStep(pipe *buildkite.Pipeline, environment string, dependsOn *buildkite.DependsOnList) {
 	pipe.AddStep(buildkite.CommandStep{
 		Label: buildkite.Value("Test"),
-		Key:   buildkite.Value("test"),
+		Key:   buildkite.Value(fmt.Sprintf("test-%s", environment)),
 		DependsOn: &buildkite.DependsOn{
 			DependsOnList: dependsOn,
 		},
