@@ -7,7 +7,6 @@ IMAGE="packages.buildkite.com/${REPO}/bkite:latest"
 
 # Prepare a file with all BUILDKITE env variables
 env | grep BUILDKITE > env.list
-cat env.list
 
 # Collect all paths in the repo that changed
 CHANGED_PATHS=$(git --no-pager diff --name-only HEAD~1 | tr '\n' ',')
