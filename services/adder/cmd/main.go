@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-// Hello
+// Hello, friend
 func add(a, b int) int {
 	return a + b
 }
